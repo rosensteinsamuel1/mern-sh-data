@@ -3,9 +3,9 @@ const mongoose = require("mongoose");
 
 const Event = require("../models/eventModel");
 
-module.exports.generateTicketData = accessToken => {
+module.exports.generateTicketDataForEvent = (accessToken, eventId) => {
   console.log("generateTicketData");
-  const eventId = 104610090; // https://www.stubhub.com/doja-cat-tickets-doja-cat-brooklyn-brooklyn-steel-4-1-2020/event/104610090/
+  //   const eventId = 104610090; // https://www.stubhub.com/doja-cat-tickets-doja-cat-brooklyn-brooklyn-steel-4-1-2020/event/104610090/
   axios({
     method: "get",
     url: "https://api.stubhub.com/sellers/search/events/v3/?id=".concat(
