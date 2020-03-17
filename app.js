@@ -1,2 +1,3 @@
-// "username": "www.stubhub.com account email",
-// "password": "www.stubhub.com account password"
+const shCron = require("./sh-cron/main");
+
+shCron();
