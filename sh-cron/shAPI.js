@@ -18,7 +18,7 @@ module.exports.getEventsForVenue = (accessToken, venueId, callback) => {
   }).then(result => {
     mongoose
       .connect(
-        "mongodb+srv://sam:S15u5Viw4GILT1oZ@sh-price-data-huw4p.mongodb.net/sh-data?retryWrites=true&w=majority"
+        "mongodb+srv://sam2:IjCTbf2pc9dYPDHc@sh-price-data-huw4p.mongodb.net/sh-data?retryWrites=true&w=majority"
       )
       .then(() => {
         console.log("Connected to database!");
@@ -28,6 +28,7 @@ module.exports.getEventsForVenue = (accessToken, venueId, callback) => {
           // Update venue database
           const venueId = event.venue.id;
           Venue.exists({ _id: venueId }).then(exists => {
+            // CHECK IF EVENT EXISTS, NOT IF VENUE EXISTS!
             if (exists) {
               // add eventId to venue events only if it's not already present
               Venue.findByIdAndUpdate(venueId, {
