@@ -40,7 +40,12 @@ module.exports.getEventsForVenue = (accessToken, venueId, callback) => {
                 _id: venueId,
                 venueCity: event.venue.city,
                 venueName: event.venue.name,
-                events: [event.id]
+                events: [
+                  {
+                    artistId: event.performers[0].id,
+                    artistName: event.performers[0].name
+                  }
+                ]
               });
               newVenue.save();
             }
