@@ -22,63 +22,40 @@ module.exports.getEventsForVenue = (accessToken, venueId, callback) => {
       )
       .then(() => {
         console.log("Connected to database!");
-
-        const events = result.data.events;
+        console.log(result.data.events[0]);
+        const events = [result.data.events[0]];
         events.forEach(event => {
           // Update venue database
           const venueId = event.venue.id;
-          Venue.exists({ _id: venueId }).then(exists => {
-            // CHECK IF EVENT EXISTS, NOT IF VENUE EXISTS!
-            if (exists) {
-              // add eventId to venue events only if it's not already present
-              Venue.findByIdAndUpdate(venueId, {
-                $addToSet: { events: event.id }
-              }).then(result => {
-                console.log(result.events.length);
-              });
-            } else {
-              const newVenue = new Venue({
-                _id: venueId,
-                venueCity: event.venue.city,
-                venueName: event.venue.name,
-                events: [
-                  {
-                    artistId: event.performers[0].id,
-                    artistName: event.performers[0].name
-                  }
-                ]
-              });
-              newVenue.save();
-            }
-          });
-
-          // Update event database
-          Event.exists({ _id: event.id }).then(exists => {
-            if (exists) {
-              // add today's ticket data to existing event
+          console.log(event);
+          // Check if the venue exists
+          saveVenue(venueId).then(() => {
+            // Update event database
+            Event.exists({ _id: event.id }).then(exists => {
               const newTicketInfoData = [
                 {
                   date: Date.now(),
                   ticketInfo: event.ticketInfo
                 }
               ];
+              if (exists) {
+                // add ticket data snapshot to existing event
+                Event.findByIdAndUpdate(event.id, {
+                  $push: { ticketInfoData: newTicketInfoData }
+                });
+              } else {
+                const newEvent = new Event({
+                  artistId: event.performers[0].id,
+                  artistName: event.performers[0].name,
+                  _id: event.id,
+                  eventDate: event.eventDateLocal,
+                  venue: event.venue,
+                  ticketInfoData: newTicketInfoData
+                });
 
-              Event.findByIdAndUpdate(event.id, {
-                $push: { ticketInfoData: newTicketInfoData }
-              });
-            } else {
-              // create new event
-              const newEvent = new Event({
-                artistId: event.performers[0].id,
-                artistName: event.performers[0].name,
-                _id: event.id,
-                eventDate: event.eventDateLocal,
-                venue: event.venue,
-                ticketInfoData: newTicketInfoData
-              });
-
-              newEvent.save();
-            }
+                newEvent.save();
+              }
+            });
           });
         });
       })
@@ -89,3 +66,31 @@ module.exports.getEventsForVenue = (accessToken, venueId, callback) => {
     callback(result.data);
   });
 };
+
+function saveVenue(venueId) {
+  Venue.exists({ _id: venueId }).then(exists => {
+    if (exists) {
+      // add eventId to venue events only if it's not already present
+
+      Venue.findByIdAndUpdate(venueId, {
+        $addToSet: { events: event.id }
+      }).then(result => {
+        console.log(result.events.length);
+      });
+    } else {
+      const newVenue = new Venue({
+        _id: venueId,
+        venueCity: event.venue.city,
+        venueName: event.venue.name,
+        events: [
+          {
+            artistId: event.performers[0].id,
+            artistName: event.performers[0].name,
+            events: event.id
+          }
+        ]
+      });
+      newVenue.save();
+    }
+  });
+}
